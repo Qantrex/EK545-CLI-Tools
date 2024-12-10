@@ -65,7 +65,7 @@ function DownloadAndExtract {
         Expand-Archive -Path $tempFile -DestinationPath $outputDir -Force
         Remove-Item -Path $tempFile -Force
     } catch {
-        Write-Host "Error downloading or extracting $url: $_" -ForegroundColor Red
+        Write-Host ("Error downloading or extracting `{0}`: {1}" -f $url, $_) -ForegroundColor Red
     }
 }
 
