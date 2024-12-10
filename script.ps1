@@ -1,10 +1,41 @@
-# Ensure the script is run with admin privileges
+<#
+.SYNOPSIS
+This script installs several command-line tools (exa, bat, zoxide, zmux, oh-my-posh) on a Windows system and configures the environment for enhanced shell usability.
+
+.DESCRIPTION
+The script automates the process of downloading, extracting, and installing popular command-line tools. It ensures:
+1. The script is run as an Administrator.
+2. Tools are downloaded to a designated directory (`$HOME\Tools`).
+3. The PATH environment variable is updated.
+4. PowerShell aliases are added to streamline usage.
+5. Recommendations for alternative terminals are provided.
+
+.REQUIREMENTS
+- Administrator privileges.
+- PowerShell 5.1 or later.
+- Internet connection for downloading tool archives.
+
+.OUTPUTS
+Console messages indicating progress and completion of the setup process.
+
+.NOTES
+- If the script fails during any step, appropriate error messages will be displayed.
+- After running the script, restart your PowerShell session to apply changes.
+
+.AUTHOR
+Konstantin Bauer
+
+.LAST UPDATED
+2024-12-10
+#>
+
+# Ensure the script is run as an Administrator
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Write-Host "Please run this script as an Administrator." -ForegroundColor Red
     exit
 }
 
-# Variables for download URLs (update dynamically if possible)
+# URLs for downloading tools
 $urls = @{
     "exa" = "https://github.com/ogham/exa/releases/latest/download/exa-win.zip"
     "bat" = "https://github.com/sharkdp/bat/releases/latest/download/bat-x86_64-pc-windows-msvc.zip"
@@ -13,13 +44,13 @@ $urls = @{
     "oh-my-posh" = "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/oh-my-posh-windows.zip"
 }
 
-# Define installation directory
+# Installation directory
 $installDir = "$HOME\Tools"
 if (-not (Test-Path $installDir)) {
     New-Item -ItemType Directory -Force -Path $installDir | Out-Null
 }
 
-# Helper function for downloading and extracting zip files
+# Function to download and extract files
 function DownloadAndExtract {
     param (
         [string]$url,
@@ -38,7 +69,7 @@ function DownloadAndExtract {
     }
 }
 
-# Download and install tools
+# Download and install each tool
 foreach ($tool in $urls.Keys) {
     Write-Host "Installing $tool..." -ForegroundColor Green
     DownloadAndExtract -url $urls[$tool] -outputDir "$installDir\$tool"
@@ -51,23 +82,23 @@ $updatedPath = ($currentPath + ";" + ($envPaths -join ";")).TrimEnd(';')
 [Environment]::SetEnvironmentVariable("Path", $updatedPath, "User")
 Write-Host "Updated PATH environment variable." -ForegroundColor Green
 
-# Set permanent aliases
+# Configure PowerShell profile
 $profilePath = $PROFILE
 if (-not (Test-Path $profilePath)) {
     New-Item -ItemType File -Path $profilePath -Force | Out-Null
 }
 
 Add-Content -Path $profilePath -Value @"
-# Permanent Aliases
 Set-Alias cat bat
 Set-Alias cd z
 Set-Alias ls exa
 "@
 Write-Host "Permanent aliases added to PowerShell profile."
 
-# Suggest alternative shell and terminal
+# Install oh-my-posh (alternative shell)
 Write-Host "Installing alternative shell and terminal..." -ForegroundColor Green
 DownloadAndExtract -url $urls["oh-my-posh"] -outputDir "$installDir\oh-my-posh"
 Write-Host "Consider using Windows Terminal or Alacritty for enhanced functionality."
 
+# Completion message
 Write-Host "Setup complete! Restart PowerShell to apply changes." -ForegroundColor Cyan
