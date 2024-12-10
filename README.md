@@ -28,4 +28,3 @@ This script installs useful CLI tools (`exa`, `bat`, `zoxide`, `zmux`) on Window
 
 - Install and configure [Oh My Posh](https://ohmyposh.dev) for a better shell prompt.
 - Use Windows Terminal or [Alacritty](https://alacritty.org) for an enhanced terminal experience.
-
